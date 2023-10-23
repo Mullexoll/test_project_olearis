@@ -6,7 +6,8 @@ import 'package:olearis_flutter/presentation/widgets/home_screen_widgets/item_ca
 import '../../../bloc/olearis_bloc.dart';
 
 class ItemListBuilder extends StatelessWidget {
-  const ItemListBuilder({
+  final ScrollController _scrollController = ScrollController();
+  ItemListBuilder({
     super.key,
   });
 
@@ -34,54 +35,48 @@ class ItemListBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scrollbar(
+        controller: _scrollController,
         child: CustomScrollView(
+          controller: _scrollController,
           physics: const ClampingScrollPhysics(),
           slivers: [
             SliverFillRemaining(
-              hasScrollBody: false,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: MediaQuery.of(context).size.width,
-                        minHeight: 158,
-                      ),
-                      child: const Center(
-                        child: ImageHeader(),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 12,
-                      right: 12,
-                      bottom: 12,
-                    ),
-                    child: BlocConsumer<OlearisBloc, OlearisState>(
-                      listener: (context, state) =>
-                          _consumerListenerHandler(state, context),
-                      builder: (context, state) {
-                        if (state is OlearisStateLoaded) {
-                          return Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: state.listItems
-                                .map((item) => ItemCard(
-                                      itemTitle: item,
-                                    ))
-                                .toList(),
-                          );
-                        }
-
-                        return const CircularProgressIndicator();
-                      },
-                    ),
-                  ),
-                ],
+              hasScrollBody: true,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: MediaQuery.of(context).size.width,
+                  minHeight: 158,
+                ),
+                child: const Center(
+                  child: ImageHeader(),
+                ),
               ),
+            ),
+            BlocConsumer<OlearisBloc, OlearisState>(
+              listener: (context, state) =>
+                  _consumerListenerHandler(state, context),
+              builder: (context, state) {
+                if (state is OlearisStateLoaded) {
+                  return SliverGrid.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                    ),
+                    itemCount: state.listItems.length,
+                    itemBuilder: ((context, index) {
+                      return ItemCard(
+                        itemTitle: state.listItems[index],
+                      );
+                    }),
+                  );
+                }
+
+                return const SliverToBoxAdapter(
+                  child: CircularProgressIndicator(),
+                );
+              },
             ),
           ],
         ),

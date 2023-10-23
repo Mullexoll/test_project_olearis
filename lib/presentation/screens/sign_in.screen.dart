@@ -21,7 +21,7 @@ class SignInScreen extends StatelessWidget {
     void signInEvent(BuildContext context) async {
       BlocProvider.of<OlearisBloc>(context).add(OlearisSignInEvent());
       await Future.delayed(
-        const Duration(seconds: 2),
+        const Duration(seconds: 0),
         () => navigateToHomeScreen(context),
       );
     }
